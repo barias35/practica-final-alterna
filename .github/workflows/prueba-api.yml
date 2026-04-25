@@ -12,20 +12,24 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # PASO 1: Newman (Validación)
-      - name: Run Newman Tests
-        run: |
-          docker compose up --exit-code-from newman-tests
+      # PASO 1: Levantar la API en segundo plano
+      - name: Start API Service
+        run: docker compose up -d flask-api
 
-      # PASO 2: Python (Consumo Secuencial)
+      # PASO 2: Newman (Validación de Colección)
+      - name: Run Newman Tests
+        run: docker compose run newman-tests
+
+      # PASO 3: Instalación de Dependencias
       - name: Install Python dependencies
         run: pip install requests
 
+      # PASO 4: Consumo desde Python
+      # Si el script termina en sys.exit(1), este paso fallará y detendrá el pipeline
       - name: Consume API via Python
         run: python scripts/consume_api.py
-        env:
-          BASE_URL: "http://localhost:5000"
 
+      # PASO 5: Limpieza (se ejecuta siempre, falle o no el anterior)
       - name: Stop Containers
         if: always()
         run: docker compose down
