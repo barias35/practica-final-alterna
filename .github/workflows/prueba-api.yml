@@ -1,0 +1,21 @@
+name: API Integration Tests
+
+on: [push, pull_request]
+
+jobs:
+  test-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Run Tests via Docker Compose
+        run: |
+          docker-compose up --exit-code-from newman-tests
+
+      - name: Shut down containers
+        if: always()
+        run: docker-compose down

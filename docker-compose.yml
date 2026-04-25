@@ -1,0 +1,29 @@
+name: API Integration & Consumption
+
+on: [push]
+
+jobs:
+  api-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Run Newman Tests
+        run: |
+          docker-compose up --exit-code-from newman-tests
+
+      - name: Install Python dependencies
+        run: pip install requests
+
+      - name: Consume API via Python
+        run: python scripts/consume_api.py
+        env:
+          BASE_URL: "http://localhost:5000"
+
+      - name: Stop Containers
+        if: always()
+        run: docker-compose down
