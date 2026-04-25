@@ -5,12 +5,16 @@ services:
     build: .
     container_name: flask-api-service
     ports:
-      - "5000:5000"
+      - "5000:5000"  # Mapeo crítico para que el script de Python alcance localhost:5000
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      # Usamos 127.0.0.1 porque el comando corre DENTRO del contenedor
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:5000/health"]
       interval: 5s
       timeout: 5s
       retries: 5
+      start_period: 15s # Tiempo de gracia para que Flask inicie antes de fallar el check
+    networks:
+      - api-network
 
   newman-tests:
     image: postman/newman:latest
@@ -19,6 +23,13 @@ services:
       - ./tests:/etc/newman
     depends_on:
       flask-api:
-        condition: service_healthy
+        condition: service_healthy # Newman no arranca hasta que la API esté 'healthy'
+    networks:
+      - api-network
+    # Sobrescribimos baseUrl para que use el nombre del servicio en la red de Docker
     command:
       run /etc/newman/postman_collection.json --env-var "baseUrl=http://flask-api:5000"
+
+networks:
+  api-network:
+    driver: bridge
