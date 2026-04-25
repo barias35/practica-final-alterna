@@ -21,14 +21,21 @@ services:
     container_name: newman-runner
     volumes:
       - ./tests:/etc/newman
+      - ./newman-reports:/etc/newman-reports # Carpeta donde se guardará el reporte
     depends_on:
       flask-api:
-        condition: service_healthy # Newman no arranca hasta que la API esté 'healthy'
+        condition: service_healthy
     networks:
       - api-network
-    # Sobrescribimos baseUrl para que use el nombre del servicio en la red de Docker
-    command:
-      run /etc/newman/postman_collection.json --env-var "baseUrl=http://flask-api:5000"
+    # Instalamos el reportero y ejecutamos generando el archivo HTML
+    entrypoint: ["/bin/sh", "-c"]
+    command: 
+      - |
+        npm install -g newman-reporter-htmlextra
+        newman run /etc/newman/postman_collection.json \
+        --env-var "baseUrl=http://flask-api:5000" \
+        --reporters cli,htmlextra \
+        --reporter-htmlextra-export /etc/newman-reports/report.html
 
 networks:
   api-network:

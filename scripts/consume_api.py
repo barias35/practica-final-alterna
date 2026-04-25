@@ -1,11 +1,14 @@
 import requests
 import time
 import sys
+import os # Importante para leer variables de entorno
 
-BASE_URL = "http://localhost:5000"
+
+BASE_URL = os.getenv("BASE_URL", "")
 
 def wait_for_api(retries=5, delay=2):
     """Espera a que la API responda antes de proceder."""
+    print(f"DEBUG: Intentando conectar a {BASE_URL}") # Útil para ver en los logs de GitHub
     for i in range(retries):
         try:
             response = requests.get(f"{BASE_URL}/health")
@@ -16,6 +19,8 @@ def wait_for_api(retries=5, delay=2):
             print(f"Sincronizando: Intento {i+1} fallido...")
             time.sleep(delay)
     return False
+
+# ... el resto de tus funciones run_consumption y el bloque __main__ se mantienen igual
 
 def run_consumption():
     try:
