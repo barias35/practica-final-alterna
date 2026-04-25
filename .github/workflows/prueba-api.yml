@@ -12,9 +12,9 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Run Tests via Docker Compose
+      - name: Run Newman Tests
         run: |
-          docker-compose up --exit-code-from newman-tests
+          docker compose up --exit-code-from newman-tests
 
       - name: Shut down containers
         if: always()
