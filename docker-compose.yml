@@ -5,7 +5,7 @@ services:
     build: .
     container_name: flask-api-service
     ports:
-      - "5000:5000"  # Mapeo crítico para que el script de Python alcance localhost:5000
+      - "5000:5000" 
     healthcheck:
       # Usamos 127.0.0.1 porque el comando corre DENTRO del contenedor
       test: ["CMD", "curl", "-f", "http://127.0.0.1:5000/health"]
